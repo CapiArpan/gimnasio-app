@@ -1,12 +1,12 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
-  root: '.',          // Asegura que Vite use la carpeta raíz
-  publicDir: 'public',// Tus assets siguen en public/
+  root: '.',             // apunta a la carpeta raíz donde está index.html
+  publicDir: 'public',   // tus assets siguen ahí (favicon, etc.)
   build: {
-    outDir: 'dist',   // Carpeta de salida estándar
+    outDir: 'dist',
     emptyOutDir: true,
   },
   plugins: [react()],
-})
+});
