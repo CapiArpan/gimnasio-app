@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 
+  Estilos globales opcionales:
+  Usa Tailwind para casi todo.
+  Si necesitas estilos personalizados globales, agrégalos aquí.
+*/
