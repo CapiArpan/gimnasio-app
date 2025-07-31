@@ -1,5 +1,5 @@
 // src/api/stats.ts
-import { supabase } from "../lib/api/supabaseClient";
+import { supabase } from "../lib/supabaseClient";
 
 // Traer conteo de filas para Dashboard
 export async function fetchStats() {

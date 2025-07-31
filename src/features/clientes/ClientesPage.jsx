@@ -5,7 +5,7 @@ import {
   crearCliente,
   actualizarCliente,
   eliminarCliente,
-} from "../lib/api/clientes";
+} from "../../lib/api/clientes";
 
 export default function Clientes() {
   const [clientes, setClientes] = useState([]);

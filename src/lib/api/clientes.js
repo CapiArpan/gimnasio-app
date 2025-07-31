@@ -1,25 +1,54 @@
-// lib/api/clientes.js
-import { supabase } from "./supabaseClient";
+// src/lib/api/clientes.js
+import { supabase } from "../supabaseClient";
 
+/**
+ * Obtener todos los clientes
+ */
 export async function obtenerClientes() {
-  const { data, error } = await supabase.from("clientes").select("*");
+  const { data, error } = await supabase
+    .from('clientes')
+    .select('*')
+    .order('fecha_inscripcion', { ascending: false });
+
   if (error) throw error;
   return data;
 }
 
-export async function crearCliente(cliente) {
-  const { data, error } = await supabase.from("clientes").insert([cliente]);
+/**
+ * Crear un nuevo cliente
+ * @param {object} clienteData - { id_usuario, plan_actual, descuento, notas }
+ */
+export async function crearCliente(clienteData) {
+  const { data, error } = await supabase
+    .from('clientes')
+    .insert([clienteData]);
+
   if (error) throw error;
-  return data[0];
+  return data;
 }
 
-export async function actualizarCliente(id, cliente) {
-  const { data, error } = await supabase.from("clientes").update(cliente).eq("id", id);
-  if (error) throw error;
-  return data[0];
+export async function actualizarCliente(id, datos) {
+  const { error } = await supabase
+    .from("clientes")
+    .update(datos)
+    .eq("id", id);
+
+  if (error) {
+    console.error("Error actualizando cliente:", error);
+    throw error;
+  }
 }
 
+
+/**
+ * Eliminar cliente por ID
+ * @param {number} id - ID del cliente
+ */
 export async function eliminarCliente(id) {
-  const { error } = await supabase.from("clientes").delete().eq("id", id);
+  const { error } = await supabase
+    .from('clientes')
+    .delete()
+    .eq('id', id);
+
   if (error) throw error;
 }

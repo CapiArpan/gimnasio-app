@@ -1,7 +1,8 @@
+// src/features/ejercicios/EjerciciosPage.jsx
 import { useEffect, useState } from "react";
-import { supabase } from "../lib/api/supabaseClient";
+import { supabase } from "../../lib/supabaseClient";
 
-export default function Ejercicios() {
+export default function EjerciciosPage() {
   const [ejercicios, setEjercicios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [nuevo, setNuevo] = useState({
@@ -14,8 +15,11 @@ export default function Ejercicios() {
   const cargarEjercicios = async () => {
     setLoading(true);
     const { data, error } = await supabase.from("ejercicios").select("*");
-    if (error) console.error(error);
-    else setEjercicios(data);
+    if (error) {
+      console.error(error);
+    } else {
+      setEjercicios(data);
+    }
     setLoading(false);
   };
 
@@ -43,8 +47,11 @@ export default function Ejercicios() {
   const eliminarEjercicio = async (id) => {
     if (!confirm("¿Eliminar ejercicio?")) return;
     const { error } = await supabase.from("ejercicios").delete().eq("id", id);
-    if (error) alert("Error eliminando");
-    else cargarEjercicios();
+    if (error) {
+      alert("Error eliminando ejercicio");
+    } else {
+      cargarEjercicios();
+    }
   };
 
   return (
@@ -64,6 +71,7 @@ export default function Ejercicios() {
           className="border p-2 rounded w-48"
           required
         />
+
         <input
           type="text"
           placeholder="Músculo objetivo"
@@ -73,6 +81,7 @@ export default function Ejercicios() {
           }
           className="border p-2 rounded w-48"
         />
+
         <input
           type="text"
           placeholder="Descripción"
@@ -82,6 +91,7 @@ export default function Ejercicios() {
           }
           className="border p-2 rounded w-64"
         />
+
         <input
           type="text"
           placeholder="Video URL"
@@ -91,6 +101,7 @@ export default function Ejercicios() {
           }
           className="border p-2 rounded w-64"
         />
+
         <button
           type="submit"
           className="bg-green-600 text-white px-4 py-2 rounded"
@@ -124,6 +135,7 @@ export default function Ejercicios() {
                     <a
                       href={eje.video_url}
                       target="_blank"
+                      rel="noopener noreferrer"
                       className="text-blue-600 underline"
                     >
                       Ver video
