@@ -1,7 +1,6 @@
 // src/context/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
-import { supabase } from '../lib/supabaseClient';
-
+import { supabase } from "../lib/supabaseClient";
 
 const AuthContext = createContext();
 
@@ -28,7 +27,6 @@ export function AuthProvider({ children }) {
       const currentUser = session.user;
       setUser(currentUser);
 
-      // Obtener rol desde la tabla usuarios
       const { data, error: userError } = await supabase
         .from("usuarios")
         .select("rol")
@@ -48,16 +46,14 @@ export function AuthProvider({ children }) {
     getSessionAndUser();
 
     const { data: listener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (_event, session) => {
         if (session?.user) {
           setUser(session.user);
-
           const { data, error: roleError } = await supabase
             .from("usuarios")
             .select("rol")
             .eq("id_auth", session.user.id)
             .single();
-
           setRole(roleError ? null : data.rol);
         } else {
           setUser(null);
@@ -67,7 +63,7 @@ export function AuthProvider({ children }) {
     );
 
     return () => {
-      listener.subscription.unsubscribe();
+      listener?.subscription?.unsubscribe();
     };
   }, []);
 
@@ -77,8 +73,13 @@ export function AuthProvider({ children }) {
     setRole(null);
   };
 
+  const setUserAndRole = (userData, userRole) => {
+    setUser(userData);
+    setRole(userRole);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, role, loading, logout }}>
+    <AuthContext.Provider value={{ user, role, loading, logout, setUserAndRole }}>
       {children}
     </AuthContext.Provider>
   );

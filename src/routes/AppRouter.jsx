@@ -1,4 +1,3 @@
-// src/routes/AppRouter.jsx
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AuthRoutes from '../features/auth/auth.routes';
@@ -25,9 +24,9 @@ export default function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Rutas de autenticación */}
-        <Route path="/login"    element={<AuthRoutes />} />
-        <Route path="/register" element={<AuthRoutes />} />
+        {/* Rutas de autenticación (corregidas con /* para permitir subrutas) */}
+        <Route path="/login/*" element={<AuthRoutes />} />
+        <Route path="/register/*" element={<AuthRoutes />} />
 
         {/* Rutas ADMIN */}
         <Route
