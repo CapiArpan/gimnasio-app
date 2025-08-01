@@ -96,6 +96,13 @@ export default function LoginPage() {
         >
           {loading ? 'Ingresando...' : 'Ingresar'}
         </button>
+        <div className="text-sm mt-4 text-center">
+  ¿No tienes cuenta?{' '}
+  <a href="/login/register" className="text-blue-400 hover:underline">
+    Regístrate aquí
+  </a>
+</div>
+
       </form>
     </div>
   );

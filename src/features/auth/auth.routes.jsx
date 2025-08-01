@@ -6,8 +6,8 @@ import RegisterPage from './components/RegisterPage';
 export default function AuthRoutes() {
   return (
     <Routes>
-      <Route index element={<LoginPage />} />
-      <Route path="register" element={<RegisterPage />} />
+      <Route path="" element={<LoginPage />} /> {/* Coincide con /login */}
+      <Route path="register" element={<RegisterPage />} /> {/* Coincide con /login/register */}
     </Routes>
   );
 }

@@ -6,7 +6,7 @@ export default function Perfil() {
 
   const cargar = async () => {
     const user = (await supabase.auth.getUser()).data.user;
-    const { data } = await supabase.from("usuarios").select("*").eq("id", user.id).single();
+    const { data } = await supabase.from("usuarios").select("*").eq("id_auth", user.id).single();
     setPerfil(data);
   };
 
