@@ -29,13 +29,13 @@ export default function LoginPage() {
       return;
     }
 
-    // 2. Buscar el rol en la tabla usuarios
-    const userId = loginData.user.id;
+ // 2. Buscar el rol en la tabla usuarios (columna id_auth)
     const { data: usuarioData, error: userError } = await supabase
       .from('usuarios')
       .select('rol')
-      .eq('id', userId)
+      .eq('id_auth', loginData.user.id)
       .single();
+
 
     if (userError || !usuarioData) {
       setErrorMsg('No se pudo obtener el rol del usuario.');

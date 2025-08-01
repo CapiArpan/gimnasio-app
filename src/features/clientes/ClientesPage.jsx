@@ -1,5 +1,6 @@
-// pages/Clientes.jsx
-import { useEffect, useState } from "react";
+// src/features/clientes/ClientesPage.jsx
+import React, { useEffect, useState } from "react";
+import { useAuth } from "../../context/AuthContext";   // ← ruta corregida
 import {
   obtenerClientes,
   crearCliente,
@@ -7,12 +8,18 @@ import {
   eliminarCliente,
 } from "../../lib/api/clientes";
 
-export default function Clientes() {
+export default function ClientesPage() {
+  const { user, loading: authLoading } = useAuth();
   const [clientes, setClientes] = useState([]);
-  const [form, setForm] = useState({ nombre: "", plan_actual: "", estado_pago: "al dia" });
+  const [form, setForm] = useState({
+    nombre: "",
+    plan_actual: "",
+    estado_pago: "al dia",
+  });
   const [editandoId, setEditandoId] = useState(null);
-  const [cargando, setCargando] = useState(true);
+  const [cargando, setCargando] = useState(false);
 
+  // Función para cargar clientes
   const cargar = async () => {
     setCargando(true);
     try {
@@ -24,9 +31,16 @@ export default function Clientes() {
     setCargando(false);
   };
 
+  // Solo llamamos a cargar() cuando la autenticación ya terminó y hay usuario
   useEffect(() => {
-    cargar();
-  }, []);
+    if (!authLoading) {
+      if (user) {
+        cargar();
+      } else {
+        console.warn("No autenticado, no se cargan clientes");
+      }
+    }
+  }, [authLoading, user]);
 
   const manejarSubmit = async (e) => {
     e.preventDefault();
@@ -45,7 +59,11 @@ export default function Clientes() {
   };
 
   const manejarEditar = (cliente) => {
-    setForm({ nombre: cliente.nombre, plan_actual: cliente.plan_actual || "", estado_pago: cliente.estado_pago || "al dia" });
+    setForm({
+      nombre: cliente.nombre,
+      plan_actual: cliente.plan_actual || "",
+      estado_pago: cliente.estado_pago || "al dia",
+    });
     setEditandoId(cliente.id);
   };
 
@@ -58,6 +76,14 @@ export default function Clientes() {
       alert("Error: " + err.message);
     }
   };
+
+  if (authLoading) {
+    return <p>Verificando sesión…</p>;
+  }
+
+  if (!user) {
+    return <p>No estás autenticado.</p>;
+  }
 
   return (
     <div className="p-4">
