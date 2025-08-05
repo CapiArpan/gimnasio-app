@@ -46,7 +46,7 @@ export default function EjerciciosPage() {
 
   const eliminarEjercicio = async (id) => {
     if (!confirm("¿Eliminar ejercicio?")) return;
-    const { error } = await supabase.from("ejercicios").delete().eq("id", id);
+    const { error } = await supabase.from("ejercicios").delete().eq("id_auth", id);
     if (error) {
       alert("Error eliminando ejercicio");
     } else {

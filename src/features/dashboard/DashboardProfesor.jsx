@@ -1,3 +1,4 @@
+// src/features/dashboard/DashboardCliente.jsx
 export default function DashboardProfesor() {
   return (
     <div className="p-4">

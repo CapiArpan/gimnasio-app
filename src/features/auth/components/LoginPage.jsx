@@ -1,92 +1,101 @@
 // src/features/auth/components/LoginPage.jsx
-import React, { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { supabase } from '../../../lib/supabaseClient.js';  // << ruta corregida
-import { useAuth } from '../../../context/AuthContext';
+import React, { useState }            from 'react';
+import { useNavigate }                from 'react-router-dom';
+import { supabase }                   from '../../../lib/supabaseClient.js';
+import { useAuth }                    from '../../../context/AuthContext';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
+  const navigate         = useNavigate();
+  const { setUserAndRole } = useAuth();
+
+  const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-  const { setUserAndRole } = useAuth();
-  const [searchParams] = useSearchParams();
-  const justRegistered = searchParams.get('registered') === '1';
+  const [loading, setLoading]   = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMsg('');
     setLoading(true);
 
-    // 1. Login con Supabase
-    const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    // 1) Autenticación
+    const { data: signInData, error: signInError } =
+      await supabase.auth.signInWithPassword({ email, password });
 
-    if (loginError) {
-      setErrorMsg('Credenciales incorrectas.');
+    console.log("→ Auth result:", { signInData, signInError });
+
+    if (signInError) {
+      setErrorMsg('Credenciales inválidas.');
       setLoading(false);
       return;
     }
 
-    const userId = loginData.user.id;
-    const { data: usuarioData, error: userError } = await supabase
+    const user = signInData.user;
+    console.log("→ Usuario supabase:", user);
+
+    if (!user) {
+      setErrorMsg('No se pudo iniciar sesión.');
+      setLoading(false);
+      return;
+    }
+
+    // 2) Leer rol de tabla 'usuarios' usando id_auth
+    console.log("→ Buscando rol en usuarios con id_auth =", user.id);
+    const { data: perfil, error: perfilError } = await supabase
       .from('usuarios')
       .select('rol')
-      .eq('id_auth', userId)
+      .eq('id_auth', user.id)
       .single();
 
-    if (userError || !usuarioData) {
+    console.log("→ Resultado perfil:", { perfil, perfilError });
+
+    if (perfilError || !perfil?.rol) {
       setErrorMsg('No se pudo obtener el rol del usuario.');
       setLoading(false);
       return;
     }
 
-    setUserAndRole(loginData.user, usuarioData.rol);
-    switch (usuarioData.rol) {
-      case 'admin':
-        navigate('/admin');
-        break;
-      case 'cliente':
-        navigate('/cliente');
-        break;
-      case 'profesor':
-        navigate('/profesor');
-        break;
-      default:
-        navigate('/');
-    }
+    const rol = perfil.rol;
+    // 3) Guardar en contexto y navegar según rol
+    setUserAndRole(user, rol);
+
+    if (rol === 'admin')        navigate('/admin');
+    else if (rol === 'profesor') navigate('/profesor');
+    else                         navigate('/cliente');
+
     setLoading(false);
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 px-4">
-      <form onSubmit={handleLogin} className="bg-gray-800 p-8 rounded shadow w-full max-w-sm">
-        <h2 className="text-2xl font-bold text-white mb-6 text-center">Iniciar Sesión</h2>
-        {justRegistered && (
-          <p className="mb-4 text-green-400 text-center">
-            Registro exitoso. Por favor, inicia sesión.
-          </p>
-        )}
+      <form onSubmit={handleLogin}
+            className="bg-gray-800 p-8 rounded shadow w-full max-w-sm">
+        <h2 className="text-2xl font-bold text-white mb-6 text-center">
+          Iniciar Sesión
+        </h2>
+
         <input
           type="email"
           placeholder="Correo electrónico"
           value={email}
-          onChange={e => setEmail(e.target.value)}
+          onChange={(e) => setEmail(e.target.value)}
           required
           className="w-full mb-4 p-2 rounded bg-gray-700 text-white"
         />
+
         <input
           type="password"
           placeholder="Contraseña"
           value={password}
-          onChange={e => setPassword(e.target.value)}
+          onChange={(e) => setPassword(e.target.value)}
           required
           className="w-full mb-4 p-2 rounded bg-gray-700 text-white"
         />
-        {errorMsg && <p className="text-red-400 mb-4">{errorMsg}</p>}
+
+        {errorMsg && (
+          <p className="text-red-400 mb-4">{errorMsg}</p>
+        )}
+
         <button
           type="submit"
           disabled={loading}
@@ -94,12 +103,6 @@ export default function LoginPage() {
         >
           {loading ? 'Ingresando...' : 'Ingresar'}
         </button>
-        <p className="mt-4 text-center text-gray-400">
-          ¿No tienes cuenta?{' '}
-          <a href="/register" className="text-blue-400 hover:underline">
-            Regístrate
-          </a>
-        </p>
       </form>
     </div>
   );
