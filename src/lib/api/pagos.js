@@ -58,7 +58,7 @@ export const deletePago = async (id) => {
   const { data, error } = await supabase
     .from("pagos")
     .delete()
-    .eq("id", id);
+    .eq("id_auth", id);
 
   if (error) throw error;
   return data;

@@ -1,3 +1,4 @@
+// src/features/auth/components/AuthGuard.jsx
 import { useEffect, useState } from 'react'
 import { supabase } from "./lib/supabaseClient"
 import { useNavigate } from 'react-router-dom'

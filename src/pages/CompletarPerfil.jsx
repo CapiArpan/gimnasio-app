@@ -1,24 +1,34 @@
-import { useState } from "react";
+// src/Pages/CompletarPerfil.jsx
+import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabaseClient";
 
 export default function CompletarPerfil({ usuario, onComplete }) {
-  const [nombre, setNombre] = useState("");
+  const [nombre, setNombre]     = useState("");
   const [guardando, setGuardando] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError]       = useState("");
+
+  // Carga inicial del nombre (opcional)
+  useEffect(() => {
+    if (usuario?.id) {
+      setNombre(usuario.nombre || "");
+    }
+  }, [usuario]);
 
   const guardarNombre = async (e) => {
     e.preventDefault();
     setError("");
     setGuardando(true);
 
-    const { error } = await supabase
+    // ⚠️ Aquí usamos id_auth, no id
+    const { error: updateError } = await supabase
       .from("usuarios")
       .update({ nombre })
-      .eq("id", usuario.id);
+      .eq("id_auth", usuario.id);
 
     setGuardando(false);
-    if (error) {
-      console.error(error);
+
+    if (updateError) {
+      console.error(updateError);
       setError("No se pudo guardar.");
     } else {
       alert("Perfil actualizado");
@@ -30,7 +40,7 @@ export default function CompletarPerfil({ usuario, onComplete }) {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <form onSubmit={guardarNombre} className="bg-white p-6 rounded shadow w-80">
         <h2 className="text-xl font-bold mb-4">Completar Perfil</h2>
-        {error && <p className="text-red-500">{error}</p>}
+        {error && <p className="text-red-500 mb-2">{error}</p>}
         <input
           className="border p-2 w-full mb-3"
           type="text"
@@ -41,12 +51,11 @@ export default function CompletarPerfil({ usuario, onComplete }) {
         <button
           type="submit"
           disabled={guardando}
-          className="bg-blue-600 text-white px-4 py-2 w-full"
+          className="bg-blue-600 text-white px-4 py-2 w-full rounded"
         >
-          Guardar
+          {guardando ? "Guardando..." : "Guardar"}
         </button>
       </form>
     </div>
   );
 }
-

@@ -31,7 +31,7 @@ export async function actualizarCliente(id, datos) {
   const { error } = await supabase
     .from("clientes")
     .update(datos)
-    .eq("id", id);
+    .eq("id_auth", id);
 
   if (error) {
     console.error("Error actualizando cliente:", error);

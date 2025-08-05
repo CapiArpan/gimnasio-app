@@ -1,4 +1,4 @@
-import React from 'react';
+// src/routes/AppRouter.jsx
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AuthRoutes from '../features/auth/auth.routes';
 import { useAuth } from '../context/AuthContext';

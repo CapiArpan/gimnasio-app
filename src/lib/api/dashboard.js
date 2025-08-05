@@ -1,3 +1,4 @@
+// src/lib/api/clientes.js 
 import { supabase } from "./supabaseClient"
 
 export async function obtenerDatosDashboard() {

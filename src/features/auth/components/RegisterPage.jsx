@@ -1,4 +1,6 @@
+// src/features/auth/components/RegisterPage.jsx
 import React, { useState } from 'react';
+import { supabase } from '../../../lib/supabaseClient.js';  // ← Import correcto
 import { useAuth } from '../../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 

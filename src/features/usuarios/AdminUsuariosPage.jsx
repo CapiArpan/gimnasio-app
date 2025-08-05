@@ -1,3 +1,4 @@
+// src/features/usuarios/AdminUsuariosPage.jsx
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 
@@ -21,7 +22,7 @@ export default function AdminUsuarios() {
     const { error } = await supabase
       .from("usuarios")
       .update({ rol: nuevoRol })
-      .eq("id", id);
+      .eq("id_auth", id);
 
     if (error) {
       alert("Error al cambiar el rol");

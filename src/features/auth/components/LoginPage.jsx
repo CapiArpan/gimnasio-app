@@ -1,7 +1,7 @@
 // src/features/auth/components/LoginPage.jsx
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../../lib/supabaseClient';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { supabase } from '../../../lib/supabaseClient.js';  // << ruta corregida
 import { useAuth } from '../../../context/AuthContext';
 
 export default function LoginPage() {
@@ -11,6 +11,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { setUserAndRole } = useAuth();
+  const [searchParams] = useSearchParams();
+  const justRegistered = searchParams.get('registered') === '1';
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -29,13 +31,12 @@ export default function LoginPage() {
       return;
     }
 
- // 2. Buscar el rol en la tabla usuarios (columna id_auth)
+    const userId = loginData.user.id;
     const { data: usuarioData, error: userError } = await supabase
       .from('usuarios')
       .select('rol')
-      .eq('id_auth', loginData.user.id)
+      .eq('id_auth', userId)
       .single();
-
 
     if (userError || !usuarioData) {
       setErrorMsg('No se pudo obtener el rol del usuario.');
@@ -43,10 +44,7 @@ export default function LoginPage() {
       return;
     }
 
-    // 3. Guardar en contexto
     setUserAndRole(loginData.user, usuarioData.rol);
-
-    // 4. Redirigir según el rol
     switch (usuarioData.rol) {
       case 'admin':
         navigate('/admin');
@@ -60,49 +58,48 @@ export default function LoginPage() {
       default:
         navigate('/');
     }
-
     setLoading(false);
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white px-4">
-      <form onSubmit={handleLogin} className="bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-sm">
-        <h2 className="text-2xl font-bold mb-6 text-center">Iniciar Sesión</h2>
-
-        <label className="block mb-2 text-sm">Correo electrónico</label>
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 px-4">
+      <form onSubmit={handleLogin} className="bg-gray-800 p-8 rounded shadow w-full max-w-sm">
+        <h2 className="text-2xl font-bold text-white mb-6 text-center">Iniciar Sesión</h2>
+        {justRegistered && (
+          <p className="mb-4 text-green-400 text-center">
+            Registro exitoso. Por favor, inicia sesión.
+          </p>
+        )}
         <input
           type="email"
+          placeholder="Correo electrónico"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={e => setEmail(e.target.value)}
           required
-          className="w-full px-4 py-2 mb-4 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full mb-4 p-2 rounded bg-gray-700 text-white"
         />
-
-        <label className="block mb-2 text-sm">Contraseña</label>
         <input
           type="password"
+          placeholder="Contraseña"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={e => setPassword(e.target.value)}
           required
-          className="w-full px-4 py-2 mb-4 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full mb-4 p-2 rounded bg-gray-700 text-white"
         />
-
-        {errorMsg && <p className="text-red-500 text-sm mb-4">{errorMsg}</p>}
-
+        {errorMsg && <p className="text-red-400 mb-4">{errorMsg}</p>}
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
+          className="w-full py-2 bg-blue-600 rounded hover:bg-blue-700 text-white"
         >
           {loading ? 'Ingresando...' : 'Ingresar'}
         </button>
-        <div className="text-sm mt-4 text-center">
-  ¿No tienes cuenta?{' '}
-  <a href="/login/register" className="text-blue-400 hover:underline">
-    Regístrate aquí
-  </a>
-</div>
-
+        <p className="mt-4 text-center text-gray-400">
+          ¿No tienes cuenta?{' '}
+          <a href="/register" className="text-blue-400 hover:underline">
+            Regístrate
+          </a>
+        </p>
       </form>
     </div>
   );

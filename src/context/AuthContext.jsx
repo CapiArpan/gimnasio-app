@@ -1,71 +1,51 @@
 // src/context/AuthContext.jsx
-import { createContext, useContext, useEffect, useState } from "react";
-import { supabase } from "../lib/supabaseClient";
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { supabase } from '../lib/supabaseClient.js';  // << ruta corregida
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);         // Sesión Supabase
-  const [role, setRole] = useState(null);         // Rol: admin, profesor, cliente
-  const [loading, setLoading] = useState(true);   // Estado de carga
+  const [user, setUser] = useState(null);
+  const [role, setRole] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const getSessionAndUser = async () => {
-      setLoading(true);
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession();
-
-      if (error || !session) {
-        setUser(null);
-        setRole(null);
-        setLoading(false);
-        return;
+    const loadSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUser(session.user);
+        await fetchRole(session.user.id);
       }
-
-      const currentUser = session.user;
-      setUser(currentUser);
-
-      const { data, error: userError } = await supabase
-        .from("usuarios")
-        .select("rol")
-        .eq("id_auth", currentUser.id)
-        .single();
-
-      if (userError) {
-        console.error("Error al obtener rol:", userError.message);
-        setRole(null);
-      } else {
-        setRole(data.rol);
-      }
-
       setLoading(false);
     };
+    loadSession();
 
-    getSessionAndUser();
-
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        if (session?.user) {
-          setUser(session.user);
-          const { data, error: roleError } = await supabase
-            .from("usuarios")
-            .select("rol")
-            .eq("id_auth", session.user.id)
-            .single();
-          setRole(roleError ? null : data.rol);
-        } else {
-          setUser(null);
-          setRole(null);
-        }
+    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        setUser(session.user);
+        await fetchRole(session.user.id);
+      } else {
+        setUser(null);
+        setRole(null);
       }
-    );
+    });
 
-    return () => {
-      listener?.subscription?.unsubscribe();
-    };
+    return () => listener.subscription.unsubscribe();
   }, []);
+
+  const fetchRole = async (userId) => {
+    const { data, error } = await supabase
+      .from('usuarios')
+      .select('rol')
+      .eq('id_auth', userId)
+      .single();
+    if (data?.rol) setRole(data.rol);
+  };
+
+  const setUserAndRole = (user, role) => {
+    setUser(user);
+    setRole(role);
+  };
 
   const logout = async () => {
     await supabase.auth.signOut();
@@ -73,18 +53,11 @@ export function AuthProvider({ children }) {
     setRole(null);
   };
 
-  const setUserAndRole = (userData, userRole) => {
-    setUser(userData);
-    setRole(userRole);
-  };
-
   return (
-    <AuthContext.Provider value={{ user, role, loading, logout, setUserAndRole }}>
+    <AuthContext.Provider value={{ user, role, loading, setUserAndRole, logout }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-export function useAuth() {
-  return useContext(AuthContext);
-}
+export const useAuth = () => useContext(AuthContext);

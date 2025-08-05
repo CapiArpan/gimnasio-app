@@ -38,7 +38,7 @@ export default function RutinasPage() {
 
   const eliminarRutina = async (id) => {
     if (!confirm("¿Eliminar rutina?")) return;
-    const { error } = await supabase.from("rutinas").delete().eq("id", id);
+    const { error } = await supabase.from("rutinas").delete().eq("id_auth", id);
     if (error) {
       alert("Error eliminando rutina");
     } else {
